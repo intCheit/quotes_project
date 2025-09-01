@@ -1,0 +1,69 @@
+from django import forms
+from django.core.exceptions import ValidationError
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.models import User
+from django.utils.translation import gettext_lazy as _
+
+from .models import Quote
+
+
+class QuoteForm(forms.ModelForm):
+    TYPE_CHOICES = (
+        ('film', 'Фильм'),
+        ('book', 'Книга'),
+        ('game', 'Игра'),
+        ('series', 'Сериал'),
+        ('comic', 'Комикс'),
+    )
+
+    # Поле "Тип источника" как выпадающий список
+    type_of_source = forms.ChoiceField(
+        choices=TYPE_CHOICES,
+        label="Тип источника",
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+
+    # Поле "Источник" с подсказкой про формат
+    source = forms.CharField(
+        label='Источник (фильм, книга и т.д.) (в формате "Произведение (год выпуска)")',
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        required=True
+    )
+
+    class Meta:
+        model = Quote
+        fields = ['text', 'source', 'weight', 'type_of_source']
+
+    def clean(self):
+        cleaned_data = super().clean()
+        source = cleaned_data.get("source")
+        if source and Quote.objects.filter(source=source).count() >= 3:
+            raise forms.ValidationError(
+                "Упс, вас уже опередили. Для данного произведения добавлено максимальное количество цитат."
+            )
+        return cleaned_data
+
+
+class CustomUserCreationForm(UserCreationForm):
+    username = forms.CharField(
+        label="Логин",
+        max_length=150,
+        help_text=_("Обязательное поле. До 150 символов. Используйте буквы, цифры и @/./+/-/_ только.")
+    )
+    password1 = forms.CharField(
+        label="Пароль",
+        widget=forms.PasswordInput,
+        help_text=_(
+            "Пароль должен содержать минимум 8 символов, "
+            "не быть слишком простым и не полностью состоять из цифр."
+        )
+    )
+    password2 = forms.CharField(
+        label="Подтверждение пароля",
+        widget=forms.PasswordInput,
+        help_text=_("Введите тот же пароль для подтверждения.")
+    )
+
+    class Meta:
+        model = User
+        fields = ("username",)
