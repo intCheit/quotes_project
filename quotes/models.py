@@ -36,8 +36,12 @@ class QuoteVote(models.Model):
         ('dislike', 'Дизлайк'),
     )
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    quote = models.ForeignKey(Quote, on_delete=models.CASCADE)
+    quote = models.ForeignKey(
+        Quote,
+        on_delete=models.CASCADE,
+        related_name='votes'  # ← добавлено related_name
+    )
     vote_type = models.CharField(max_length=7, choices=VOTE_CHOICES)
 
     class Meta:
-        unique_together = ('user', 'quote')  # один пользователь — один голос на цитату
+        unique_together = ('user', 'quote')
