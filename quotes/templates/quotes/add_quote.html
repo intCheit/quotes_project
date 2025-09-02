@@ -14,7 +14,8 @@
 
         <div class="mb-3">
             <label for="id_text" class="form-label">Текст цитаты</label>
-            <textarea name="text" id="id_text" class="form-control" rows="3" required>{{ form.text.value }}</textarea>
+            <textarea name="text" id="id_text" class="form-control" rows="3" required
+                      placeholder="Чтобы стать царем зверей, мало вести себя по-царски. Надо быть царём. Нельзя сомневаться. Сомнения порождают хаос и ведут тебя к гибели. Так сказала моя царица...">{{ form.text.value }}</textarea>
             {% if form.text.errors %}
                 <div class="text-danger mt-1">{{ form.text.errors.0 }}</div>
             {% endif %}
@@ -31,9 +32,18 @@
         <div class="mb-3">
             <label for="id_source" class="form-label">Источник (фильм, книга и т.д.) (в формате "Произведение (год выпуска)")</label>
             <input type="text" name="source" id="id_source" class="form-control" required
-                   value="{{ form.source.value }}">
+                   value="{{ form.source.value }}" placeholder="Джентельмены (2019)">
             {% if form.source.errors %}
                 <div class="text-danger mt-1">{{ form.source.errors.0 }}</div>
+            {% endif %}
+        </div>
+
+        <div class="mb-3">
+            <label for="id_movie_link" class="form-label">Ссылка на фильм (необязательно)</label>
+            <input type="url" name="movie_link" id="id_movie_link" class="form-control"
+                   placeholder="https://www.kinopoisk.ru/film/1143242/" value="{{ form.movie_link.value }}">
+            {% if form.movie_link.errors %}
+                <div class="text-danger mt-1">{{ form.movie_link.errors.0 }}</div>
             {% endif %}
         </div>
 
@@ -43,15 +53,6 @@
                    min="1" max="10" value="{{ form.weight.value|default_if_none:1 }}">
             {% if form.weight.errors %}
                 <div class="text-danger mt-1">{{ form.weight.errors.0 }}</div>
-            {% endif %}
-        </div>
-
-        <div class="mb-3">
-            <label for="id_movie_link" class="form-label">Ссылка на фильм (необязательно)</label>
-            <input type="url" name="movie_link" id="id_movie_link" class="form-control"
-                   placeholder="https://..." value="{{ form.movie_link.value }}">
-            {% if form.movie_link.errors %}
-                <div class="text-danger mt-1">{{ form.movie_link.errors.0 }}</div>
             {% endif %}
         </div>
 
