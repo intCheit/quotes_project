@@ -1,8 +1,8 @@
 import random
-
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
 from django.db import IntegrityError
+from django.db.models import Count, Sum
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 
@@ -61,7 +61,6 @@ def vote(request, quote_id, vote_type):
             if vote_obj.vote_type == vote_type:
                 return JsonResponse({'error': 'Вы уже голосовали этим способом'}, status=400)
             else:
-                # меняем голос
                 if vote_obj.vote_type == 'like':
                     quote.likes -= 1
                     quote.dislikes += 1
@@ -71,7 +70,6 @@ def vote(request, quote_id, vote_type):
                 vote_obj.vote_type = vote_type
                 vote_obj.save()
         else:
-            # новый голос
             if vote_type == 'like':
                 quote.likes += 1
             else:
@@ -107,3 +105,45 @@ def register(request):
     else:
         form = CustomUserCreationForm()
     return render(request, 'quotes/register.html', {'form': form})
+
+
+def random_source_quotes(request):
+    """
+    Случайное произведение и его цитаты с фильтром по типу источника.
+    """
+    type_filter = request.GET.get('type')
+    sources_qs = Quote.objects.all()
+    if type_filter:
+        sources_qs = sources_qs.filter(type_of_source=type_filter)
+
+    sources = sources_qs.values_list('source', flat=True).distinct()
+    if not sources:
+        quotes = []
+        source = None
+    else:
+        source = random.choice(list(sources))
+        quotes = Quote.objects.filter(source=source)
+
+    context = {
+        'quotes': quotes,
+        'source': source,
+        'type_filter': type_filter,
+        'user': request.user,
+    }
+    return render(request, 'quotes/quotes_by_source.html', context)
+
+
+def dashboard(request):
+    """
+    Простой дашборд с количеством цитат и лайков/дизлайков по типу источника.
+    """
+    quotes_by_type = Quote.objects.values('type_of_source').annotate(total=Count('id'))
+    likes_by_type = Quote.objects.values('type_of_source').annotate(total_likes=Sum('likes'))
+    dislikes_by_type = Quote.objects.values('type_of_source').annotate(total_dislikes=Sum('dislikes'))
+
+    context = {
+        'quotes_by_type': list(quotes_by_type),
+        'likes_by_type': list(likes_by_type),
+        'dislikes_by_type': list(dislikes_by_type),
+    }
+    return render(request, 'quotes/dashboard.html', context)
