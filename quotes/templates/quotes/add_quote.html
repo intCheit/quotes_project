@@ -12,15 +12,19 @@
             <div class="alert alert-danger">{{ form.non_field_errors.0 }}</div>
         {% endif %}
 
+        <!-- Текст цитаты -->
         <div class="mb-3">
             <label for="id_text" class="form-label">Текст цитаты</label>
-            <textarea name="text" id="id_text" class="form-control" rows="3" required
-                      placeholder="Чтобы стать царем зверей, мало вести себя по-царски. Надо быть царём. Нельзя сомневаться. Сомнения порождают хаос и ведут тебя к гибели. Так сказала моя царица...">{{ form.text.value }}</textarea>
+            <textarea name="text" id="id_text" class="form-control" rows="3"
+                onfocus="if(this.value==='Чтобы стать царем зверей, мало вести себя по-царски. Надо быть царём. Нельзя сомневаться. Сомнения порождают хаос и ведут тебя к гибели. Так сказала моя царица...'){this.value=''}"
+                onblur="if(this.value===''){this.value='Чтобы стать царем зверей, мало вести себя по-царски. Надо быть царём. Нельзя сомневаться. Сомнения порождают хаос и ведут тебя к гибели. Так сказала моя царица...'}"
+            >Чтобы стать царем зверей, мало вести себя по-царски. Надо быть царём. Нельзя сомневаться. Сомнения порождают хаос и ведут тебя к гибели. Так сказала моя царица...</textarea>
             {% if form.text.errors %}
                 <div class="text-danger mt-1">{{ form.text.errors.0 }}</div>
             {% endif %}
         </div>
 
+        <!-- Тип источника -->
         <div class="mb-3">
             <label for="id_type_of_source" class="form-label">Тип источника</label>
             {{ form.type_of_source }}
@@ -29,24 +33,33 @@
             {% endif %}
         </div>
 
+        <!-- Источник -->
         <div class="mb-3">
-            <label for="id_source" class="form-label">Источник (фильм, книга и т.д.) (в формате "Произведение (год выпуска)")</label>
-            <input type="text" name="source" id="id_source" class="form-control" required
-                   value="{{ form.source.value }}" placeholder="Джентельмены (2019)">
+            <label for="id_source" class="form-label">Источник (фильм, книга и т.д.)</label>
+            <input type="text" name="source" id="id_source" class="form-control"
+                value="Джентельмены (2019)"
+                onfocus="if(this.value==='Джентельмены (2019)'){this.value=''}"
+                onblur="if(this.value===''){this.value='Джентельмены (2019)'}"
+            >
             {% if form.source.errors %}
                 <div class="text-danger mt-1">{{ form.source.errors.0 }}</div>
             {% endif %}
         </div>
 
+        <!-- Ссылка на фильм -->
         <div class="mb-3">
-            <label for="id_movie_link" class="form-label">Ссылка на фильм (необязательно)</label>
+            <label for="id_movie_link" class="form-label">Ссылка на фильм</label>
             <input type="url" name="movie_link" id="id_movie_link" class="form-control"
-                   placeholder="https://www.kinopoisk.ru/film/1143242/" value="{{ form.movie_link.value }}">
+                value="https://www.kinopoisk.ru/film/1143242/"
+                onfocus="if(this.value==='https://www.kinopoisk.ru/film/1143242/'){this.value=''}"
+                onblur="if(this.value===''){this.value='https://www.kinopoisk.ru/film/1143242/'}"
+            >
             {% if form.movie_link.errors %}
                 <div class="text-danger mt-1">{{ form.movie_link.errors.0 }}</div>
             {% endif %}
         </div>
 
+        <!-- Вес цитаты -->
         <div class="mb-3">
             <label for="id_weight" class="form-label">Вес (1–10)</label>
             <input type="number" name="weight" id="id_weight" class="form-control" required
