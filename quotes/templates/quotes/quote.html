@@ -56,10 +56,11 @@
             <p>Авторизуйтесь, чтобы голосовать: <a href="{% url 'login' %}">Вход</a></p>
         {% endif %}
 
-        <p>
-            <a href="{% url 'add_quote' %}" class="btn btn-outline-primary me-2">➕ Добавить новую цитату</a>
-            <a href="{% url 'top_quotes' %}" class="btn btn-outline-primary">🏆 Топ-10 цитат</a>
-        </p>
+        <div class="d-flex flex-wrap mb-3">
+            <a href="{% url 'add_quote' %}" class="btn btn-outline-primary me-2 mb-2">➕ Добавить новую цитату</a>
+            <a href="{% url 'top_quotes' %}" class="btn btn-outline-primary me-2 mb-2">🏆 Топ-10 цитат</a>
+            <a href="{% url 'random_source_quotes' %}" class="btn btn-outline-secondary mb-2">🎲 Цитаты случайного произведения</a>
+        </div>
 
     {% else %}
         <p>Цитат пока нет!</p>
