@@ -1,0 +1,52 @@
+{% extends "quotes/base.html" %}
+{% load quote_extras %}  {# Подключаем пользовательские фильтры #}
+
+{% block title %}Дашборд{% endblock %}
+
+{% block content %}
+<h2>Статистика цитат</h2>
+
+<canvas id="quotesChart" width="400" height="200"></canvas>
+<canvas id="likesChart" width="400" height="200" class="mt-4"></canvas>
+<canvas id="dislikesChart" width="400" height="200" class="mt-4"></canvas>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const quotesData = {
+    labels: {{ quotes_by_type|pluck:"type_of_source"|safe }},
+    datasets: [{
+        label: 'Количество цитат',
+        data: {{ quotes_by_type|pluck:"total"|safe }},
+        backgroundColor: 'rgba(135, 206, 235, 0.5)',
+        borderColor: 'rgba(0, 191, 255, 1)',
+        borderWidth: 1
+    }]
+};
+
+const likesData = {
+    labels: {{ likes_by_type|pluck:"type_of_source"|safe }},
+    datasets: [{
+        label: 'Лайки',
+        data: {{ likes_by_type|pluck:"total_likes"|safe }},
+        backgroundColor: 'rgba(0, 255, 127, 0.5)',
+        borderColor: 'rgba(0, 128, 0, 1)',
+        borderWidth: 1
+    }]
+};
+
+const dislikesData = {
+    labels: {{ dislikes_by_type|pluck:"type_of_source"|safe }},
+    datasets: [{
+        label: 'Дизлайки',
+        data: {{ dislikes_by_type|pluck:"total_dislikes"|safe }},
+        backgroundColor: 'rgba(255, 99, 132, 0.5)',
+        borderColor: 'rgba(255, 0, 0, 1)',
+        borderWidth: 1
+    }]
+};
+
+new Chart(document.getElementById('quotesChart'), { type: 'bar', data: quotesData });
+new Chart(document.getElementById('likesChart'), { type: 'bar', data: likesData });
+new Chart(document.getElementById('dislikesChart'), { type: 'bar', data: dislikesData });
+</script>
+{% endblock %}
