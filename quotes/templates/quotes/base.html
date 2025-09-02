@@ -11,19 +11,33 @@
         .btn-primary { background-color: #87ceeb; border-color: #87ceeb; }
         .btn-primary:hover { background-color: #00bfff; border-color: #00bfff; }
         a { text-decoration: none; }
+        /* адаптив для кнопок справа */
+        .user-actions {
+            min-width: 250px; /* резервируем место, чтобы ничего не прыгало */
+        }
+        @media (max-width: 576px) {
+            .user-actions {
+                flex-direction: column;
+                align-items: flex-end;
+            }
+            .user-actions a, 
+            .user-actions span {
+                margin-bottom: 5px;
+            }
+        }
     </style>
 </head>
 <body>
 <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm mb-4">
-    <div class="container-fluid">
+    <div class="container-fluid d-flex justify-content-between align-items-center">
         <a class="navbar-brand" href="{% url 'random_quote' %}">Цитаты</a>
-        <div class="d-flex ms-auto">
+        <div class="d-flex align-items-center user-actions justify-content-end">
             {% if user.is_authenticated %}
                 <span class="me-3">Привет, {{ user.username }}!</span>
-                <a href="{% url 'logout' %}" class="btn btn-outline-primary me-2">Выход</a>
+                <a href="{% url 'logout' %}" class="btn btn-outline-primary btn-sm">Выход</a>
             {% else %}
-                <a href="{% url 'login' %}" class="btn btn-primary me-2">Вход</a>
-                <a href="{% url 'register' %}" class="btn btn-outline-primary">Регистрация</a>
+                <a href="{% url 'login' %}" class="btn btn-primary btn-sm me-2">Вход</a>
+                <a href="{% url 'register' %}" class="btn btn-outline-primary btn-sm">Регистрация</a>
             {% endif %}
         </div>
     </div>

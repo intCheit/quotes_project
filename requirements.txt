@@ -1,5 +1,5 @@
 asgiref==3.8.1
-backports.zoneinfo==0.2.1
+backports.zoneinfo; python_version < "3.9"
 django==4.2.23
 sqlparse==0.5.3
 typing-extensions==4.13.2
