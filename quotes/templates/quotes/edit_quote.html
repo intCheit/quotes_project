@@ -1,0 +1,14 @@
+{% extends "quotes/base.html" %}
+{% block title %}Редактировать цитату{% endblock %}
+
+{% block content %}
+<div class="card p-4 shadow">
+    <h3>Редактировать цитату</h3>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary">Сохранить изменения</button>
+        <a href="{% url 'random_quote' %}" class="btn btn-secondary">Отмена</a>
+    </form>
+</div>
+{% endblock %}

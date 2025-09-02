@@ -17,4 +17,5 @@ urlpatterns = [
     path('register/', views.register, name='register'),
     path('top/', views.top_quotes, name='top_quotes'),
     path('vote/<int:quote_id>/<str:vote_type>/', views.vote, name='vote'),
+    path('edit/<int:quote_id>/', views.edit_quote, name='edit_quote'),
 ]

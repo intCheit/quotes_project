@@ -103,7 +103,10 @@ def add_quote(request):
     if request.method == 'POST':
         form = QuoteForm(request.POST)
         if form.is_valid():
-            form.save()
+            quote = form.save(commit=False)
+            if request.user.is_authenticated:
+                quote.author = request.user
+            quote.save()
             return redirect('random_quote')
     else:
         form = QuoteForm()
@@ -171,3 +174,21 @@ def dashboard(request):
         'dislikes_by_type': list(dislikes_by_type),
     }
     return render(request, 'quotes/dashboard.html', context)
+
+
+@login_required
+def edit_quote(request, quote_id):
+    quote = get_object_or_404(Quote, id=quote_id)
+
+    if quote.author != request.user:
+        return redirect('random_quote')
+
+    if request.method == 'POST':
+        form = QuoteForm(request.POST, instance=quote)
+        if form.is_valid():
+            form.save()
+            return redirect('random_quote')
+    else:
+        form = QuoteForm(instance=quote)
+
+    return render(request, 'quotes/edit_quote.html', {'form': form, 'quote': quote})

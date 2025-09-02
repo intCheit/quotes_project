@@ -15,6 +15,13 @@ class Quote(models.Model):
         ('series', 'Сериал'),
         ('comic', 'Комикс'),
     )
+    author = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='quotes'
+    )
 
     text = models.TextField(unique=True)
     source = models.CharField(max_length=255)

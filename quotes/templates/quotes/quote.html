@@ -8,8 +8,14 @@
         <p class="text-muted"><em>{{ quote.source }}</em></p>
         <p>👁️ Просмотры: {{ quote.views }} | 👍 Лайки: <span id="likes">{{ quote.likes }}</span> | 👎 Дизлайки: <span id="dislikes">{{ quote.dislikes }}</span></p>
 
+        {% if user.is_authenticated and quote.author == user %}
+            <a href="{% url 'edit_quote' quote.id %}" class="btn btn-outline-primary btn-sm me-2 mb-2">
+                ✏️ Редактировать
+            </a>
+        {% endif %}
+
         {% if user.is_authenticated %}
-        <div class="mb-3">
+        <div class="mb-3 d-flex align-items-center">
             <button id="like-btn" class="btn me-2 {% if user_vote == 'like' %}btn-success{% else %}btn-primary{% endif %}">👍 Лайк</button>
             <button id="dislike-btn" class="btn {% if user_vote == 'dislike' %}btn-danger{% else %}btn-primary{% endif %}">👎 Дизлайк</button>
         </div>
@@ -28,7 +34,6 @@
                     document.getElementById('likes').textContent = data.likes;
                     document.getElementById('dislikes').textContent = data.dislikes;
 
-                    // Подсветка кнопок
                     const likeBtn = document.getElementById('like-btn');
                     const dislikeBtn = document.getElementById('dislike-btn');
 
