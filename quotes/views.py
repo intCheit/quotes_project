@@ -1,4 +1,5 @@
 import random
+
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
 from django.db import IntegrityError
@@ -11,11 +12,14 @@ from .models import Quote, QuoteVote
 
 
 def random_quote(request):
+    """
+    Возвращает случайную цитату с учетом веса. Увеличивает счетчик
+    просмотров и отображает статус голосования текущего пользователя.
+    """
     quotes = list(Quote.objects.all())
     if not quotes:
         return render(request, 'quotes/quote.html', {'quote': None})
 
-    # Случайный выбор с весом
     total_weight = sum(q.weight for q in quotes)
     r = random.uniform(0, total_weight)
     upto = 0
@@ -25,11 +29,9 @@ def random_quote(request):
             break
         upto += q.weight
 
-    # Увеличиваем просмотры
     selected.views += 1
     selected.save()
 
-    # Проверяем, голосовал ли текущий пользователь
     user_vote = None
     if request.user.is_authenticated:
         try:
@@ -38,14 +40,18 @@ def random_quote(request):
         except QuoteVote.DoesNotExist:
             pass
 
-    return render(request, 'quotes/quote.html', {
-        'quote': selected,
-        'user_vote': user_vote,
-    })
+    return render(
+        request,
+        'quotes/quote.html',
+        {'quote': selected, 'user_vote': user_vote}
+    )
 
 
 @login_required
 def vote(request, quote_id, vote_type):
+    """
+    Обрабатывает голосование пользователя (лайк/дизлайк) по цитате.
+    """
     quote = get_object_or_404(Quote, id=quote_id)
 
     if vote_type not in ['like', 'dislike']:
@@ -59,16 +65,17 @@ def vote(request, quote_id, vote_type):
         )
         if not created:
             if vote_obj.vote_type == vote_type:
-                return JsonResponse({'error': 'Вы уже голосовали этим способом'}, status=400)
+                return JsonResponse(
+                    {'error': 'Вы уже голосовали этим способом'}, status=400
+                )
+            if vote_obj.vote_type == 'like':
+                quote.likes -= 1
+                quote.dislikes += 1
             else:
-                if vote_obj.vote_type == 'like':
-                    quote.likes -= 1
-                    quote.dislikes += 1
-                else:
-                    quote.dislikes -= 1
-                    quote.likes += 1
-                vote_obj.vote_type = vote_type
-                vote_obj.save()
+                quote.dislikes -= 1
+                quote.likes += 1
+            vote_obj.vote_type = vote_type
+            vote_obj.save()
         else:
             if vote_type == 'like':
                 quote.likes += 1
@@ -77,15 +84,22 @@ def vote(request, quote_id, vote_type):
         quote.save()
         return JsonResponse({'likes': quote.likes, 'dislikes': quote.dislikes})
     except IntegrityError:
-        return JsonResponse({'error': 'Ошибка при сохранении голосования'}, status=400)
+        return JsonResponse({'error': 'Ошибка при сохранении голосования'},
+                            status=400)
 
 
 def top_quotes(request):
+    """
+    Возвращает 10 цитат с наибольшим количеством лайков.
+    """
     quotes = Quote.objects.order_by('-likes')[:10]
     return render(request, 'quotes/top_quotes.html', {'quotes': quotes})
 
 
 def add_quote(request):
+    """
+    Добавление новой цитаты через форму.
+    """
     if request.method == 'POST':
         form = QuoteForm(request.POST)
         if form.is_valid():
@@ -97,6 +111,9 @@ def add_quote(request):
 
 
 def register(request):
+    """
+    Регистрация нового пользователя.
+    """
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
@@ -109,7 +126,7 @@ def register(request):
 
 def random_source_quotes(request):
     """
-    Случайное произведение и его цитаты с фильтром по типу источника.
+    Возвращает цитаты случайного источника с фильтром по типу источника.
     """
     type_filter = request.GET.get('type')
     sources_qs = Quote.objects.all()
@@ -135,11 +152,18 @@ def random_source_quotes(request):
 
 def dashboard(request):
     """
-    Простой дашборд с количеством цитат и лайков/дизлайков по типу источника.
+    Дашборд с графиками: количество цитат и лайков/дизлайков по типу
+    источника.
     """
-    quotes_by_type = Quote.objects.values('type_of_source').annotate(total=Count('id'))
-    likes_by_type = Quote.objects.values('type_of_source').annotate(total_likes=Sum('likes'))
-    dislikes_by_type = Quote.objects.values('type_of_source').annotate(total_dislikes=Sum('dislikes'))
+    quotes_by_type = Quote.objects.values('type_of_source').annotate(
+        total=Count('id')
+    )
+    likes_by_type = Quote.objects.values('type_of_source').annotate(
+        total_likes=Sum('likes')
+    )
+    dislikes_by_type = Quote.objects.values('type_of_source').annotate(
+        total_dislikes=Sum('dislikes')
+    )
 
     context = {
         'quotes_by_type': list(quotes_by_type),
