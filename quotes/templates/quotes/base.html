@@ -11,6 +11,12 @@
         .btn-primary { background-color: #87ceeb; border-color: #87ceeb; }
         .btn-primary:hover { background-color: #00bfff; border-color: #00bfff; }
         a { text-decoration: none; }
+
+        /* кнопки в navbar */
+        .navbar .nav-btns a {
+            margin-right: 8px;
+        }
+
         /* адаптив для кнопок справа */
         .user-actions {
             min-width: 250px; /* резервируем место, чтобы ничего не прыгало */
@@ -22,6 +28,11 @@
             }
             .user-actions a, 
             .user-actions span {
+                margin-bottom: 5px;
+            }
+            .navbar .nav-btns {
+                flex-direction: column;
+                align-items: flex-start;
                 margin-bottom: 5px;
             }
         }
@@ -36,20 +47,30 @@
                 📚 Цитаты
             </a>
             {% if user.is_authenticated %}
-                <a href="{% url 'add_quote' %}" class="btn btn-outline-primary btn-sm">
-                    ➕ Добавить новую цитату
+                <a href="{% url 'add_quote' %}" class="btn btn-outline-primary btn-sm me-2">
+                    ➕ Добавить цитату
                 </a>
             {% endif %}
         </div>
 
-        <div class="d-flex align-items-center user-actions justify-content-end">
-            {% if user.is_authenticated %}
-                <span class="me-3">Привет, {{ user.username }}!</span>
-                <a href="{% url 'logout' %}" class="btn btn-outline-primary btn-sm">Выход</a>
-            {% else %}
-                <a href="{% url 'login' %}" class="btn btn-primary btn-sm me-2">Вход</a>
-                <a href="{% url 'register' %}" class="btn btn-outline-primary btn-sm">Регистрация</a>
-            {% endif %}
+        <div class="d-flex align-items-center">
+            <!-- кнопки навигации -->
+            <div class="d-flex nav-btns me-3">
+                <a href="{% url 'top_quotes' %}" class="btn btn-outline-primary btn-sm">🏆 Топ-10 цитат</a>
+                <a href="{% url 'random_source_quotes' %}" class="btn btn-outline-secondary btn-sm">🎲 Цитаты случайного произведения</a>
+                <a href="{% url 'dashboard' %}" class="btn btn-outline-success btn-sm">📊 Статистика цитат</a>
+            </div>
+
+            <!-- приветствие и вход/выход -->
+            <div class="d-flex align-items-center user-actions">
+                {% if user.is_authenticated %}
+                    <span class="me-3">Привет, {{ user.username }}!</span>
+                    <a href="{% url 'logout' %}" class="btn btn-outline-primary btn-sm">Выход</a>
+                {% else %}
+                    <a href="{% url 'login' %}" class="btn btn-primary btn-sm me-2">Вход</a>
+                    <a href="{% url 'register' %}" class="btn btn-outline-primary btn-sm">Регистрация</a>
+                {% endif %}
+            </div>
         </div>
     </div>
 </nav>

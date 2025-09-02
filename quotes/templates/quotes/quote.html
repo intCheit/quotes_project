@@ -29,9 +29,7 @@
         function sendVote(voteType) {
             fetch(`/vote/{{ quote.id }}/${voteType}/`, {
                 method: 'POST',
-                headers: {
-                    'X-CSRFToken': '{{ csrf_token }}',
-                },
+                headers: { 'X-CSRFToken': '{{ csrf_token }}' },
             })
             .then(response => response.json())
             .then(data => {
@@ -43,22 +41,17 @@
                     const dislikeBtn = document.getElementById('dislike-btn');
 
                     if (voteType === 'like') {
-                        likeBtn.classList.add('btn-success');
-                        likeBtn.classList.remove('btn-primary');
-                        dislikeBtn.classList.remove('btn-danger');
-                        dislikeBtn.classList.add('btn-primary');
+                        likeBtn.classList.add('btn-success'); likeBtn.classList.remove('btn-primary');
+                        dislikeBtn.classList.remove('btn-danger'); dislikeBtn.classList.add('btn-primary');
                     } else {
-                        dislikeBtn.classList.add('btn-danger');
-                        dislikeBtn.classList.remove('btn-primary');
-                        likeBtn.classList.remove('btn-success');
-                        likeBtn.classList.add('btn-primary');
+                        dislikeBtn.classList.add('btn-danger'); dislikeBtn.classList.remove('btn-primary');
+                        likeBtn.classList.remove('btn-success'); likeBtn.classList.add('btn-primary');
                     }
                 } else {
                     alert(data.error);
                 }
             });
         }
-
         document.getElementById('like-btn').addEventListener('click', () => sendVote('like'));
         document.getElementById('dislike-btn').addEventListener('click', () => sendVote('dislike'));
         </script>
@@ -66,17 +59,6 @@
             <p>Авторизуйтесь, чтобы голосовать: <a href="{% url 'login' %}">Вход</a></p>
         {% endif %}
 
-        <div class="d-flex flex-wrap mb-3">
-            <a href="{% url 'top_quotes' %}" class="btn btn-outline-primary me-2 mb-2">
-                🏆 Топ-10 цитат
-            </a>
-            <a href="{% url 'random_source_quotes' %}" class="btn btn-outline-secondary me-2 mb-2">
-                🎲 Цитаты случайного произведения
-            </a>
-            <a href="{% url 'dashboard' %}" class="btn btn-outline-success me-2 mb-2">
-                📊 Статистика цитат
-            </a>
-        </div>
     {% else %}
         <p>Цитат пока нет!</p>
         <a href="{% url 'add_quote' %}" class="btn btn-outline-primary">➕ Добавить первую цитату</a>
