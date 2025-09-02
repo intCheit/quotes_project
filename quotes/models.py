@@ -30,6 +30,12 @@ class Quote(models.Model):
         choices=TYPE_CHOICES,
         default='film'
     )
+    movie_link = models.URLField(
+        max_length=500,
+        blank=True,
+        null=True,
+        verbose_name="Ссылка на фильм"
+    )
     weight = models.PositiveIntegerField(default=1)
     views = models.PositiveIntegerField(default=0)
     likes = models.PositiveIntegerField(default=0)

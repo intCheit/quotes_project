@@ -46,6 +46,15 @@
             {% endif %}
         </div>
 
+        <div class="mb-3">
+            <label for="id_movie_link" class="form-label">Ссылка на фильм (необязательно)</label>
+            <input type="url" name="movie_link" id="id_movie_link" class="form-control"
+                   placeholder="https://..." value="{{ form.movie_link.value }}">
+            {% if form.movie_link.errors %}
+                <div class="text-danger mt-1">{{ form.movie_link.errors.0 }}</div>
+            {% endif %}
+        </div>
+
         <button type="submit" class="btn btn-primary mt-2">Добавить цитату</button>
     </form>
 

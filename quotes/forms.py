@@ -37,6 +37,12 @@ class QuoteForm(forms.ModelForm):
         model = Quote
         fields = ['text', 'source', 'weight', 'type_of_source']
 
+    movie_link = forms.URLField(
+        label="Ссылка на фильм (необязательно)",
+        required=False,
+        widget=forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'https://...'})
+    )
+
     def clean(self):
         """
         Проверяет, чтобы для одного источника не было более трёх цитат.

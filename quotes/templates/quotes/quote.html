@@ -6,6 +6,11 @@
     {% if quote %}
         <h3 class="card-title">{{ quote.text|linebreaksbr }}</h3>
         <p class="text-muted"><em>{{ quote.source }}</em></p>
+
+        {% if quote.movie_link %}
+            <p>🎬 <a href="{{ quote.movie_link }}" target="_blank">Ссылка на фильм</a></p>
+        {% endif %}
+
         <p>👁️ Просмотры: {{ quote.views }} | 👍 Лайки: <span id="likes">{{ quote.likes }}</span> | 👎 Дизлайки: <span id="dislikes">{{ quote.dislikes }}</span></p>
 
         {% if user.is_authenticated and quote.author == user %}
