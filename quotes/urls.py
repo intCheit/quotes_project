@@ -11,4 +11,6 @@ urlpatterns = [
     path('vote/<int:quote_id>/<str:vote_type>/', views.vote, name='vote'),
     path('top/', views.top_quotes, name='top_quotes'),
     path('add/', views.add_quote, name='add_quote'),
+    path('random_source/', views.random_source_quotes, name='random_source_quotes'),
+    path('dashboard/', views.dashboard, name='dashboard'),
 ]
