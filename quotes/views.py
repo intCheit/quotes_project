@@ -23,14 +23,14 @@ def random_quote(request):
     if not quotes:
         return render(request, 'quotes/quote.html', {'quote': None})
 
-    total_weight = sum(q.weight for q in quotes)
-    r = random.uniform(0, total_weight)
+    total_weight = sum(quote.weight for quote in quotes)
+    random_weight = random.uniform(0, total_weight)
     upto = 0
-    for q in quotes:
-        if upto + q.weight >= r:
-            selected = q
+    for quote in quotes:
+        if upto + quote.weight >= random_weight:
+            selected = quote
             break
-        upto += q.weight
+        upto += quote.weight
 
     selected.views += 1
     selected.save()
@@ -38,7 +38,9 @@ def random_quote(request):
     user_vote = None
     if request.user.is_authenticated:
         try:
-            vote_obj = QuoteVote.objects.get(user=request.user, quote=selected)
+            vote_obj = QuoteVote.objects.get(
+                user=request.user, quote=selected
+            )
             user_vote = vote_obj.vote_type
         except QuoteVote.DoesNotExist:
             pass
@@ -46,7 +48,7 @@ def random_quote(request):
     return render(
         request,
         'quotes/quote.html',
-        {'quote': selected, 'user_vote': user_vote}
+        {'quote': selected, 'user_vote': user_vote},
     )
 
 
@@ -58,17 +60,21 @@ def vote(request, quote_id, vote_type):
     quote = get_object_or_404(Quote, id=quote_id)
 
     if vote_type not in ['like', 'dislike']:
-        return JsonResponse({'error': 'Неверный тип голосования'}, status=400)
+        return JsonResponse(
+            {'error': 'Неверный тип голосования'}, status=400
+        )
 
     try:
         vote_obj, created = QuoteVote.objects.get_or_create(
             user=request.user,
             quote=quote,
-            defaults={'vote_type': vote_type}
+            defaults={'vote_type': vote_type},
         )
         if not created:
             if vote_obj.vote_type == vote_type:
-                return JsonResponse({'error': 'Вы уже голосовали этим способом'}, status=400)
+                return JsonResponse(
+                    {'error': 'Вы уже голосовали этим способом'}, status=400
+                )
             if vote_obj.vote_type == 'like':
                 quote.likes -= 1
                 quote.dislikes += 1
@@ -83,9 +89,13 @@ def vote(request, quote_id, vote_type):
             else:
                 quote.dislikes += 1
         quote.save()
-        return JsonResponse({'likes': quote.likes, 'dislikes': quote.dislikes})
+        return JsonResponse(
+            {'likes': quote.likes, 'dislikes': quote.dislikes}
+        )
     except IntegrityError:
-        return JsonResponse({'error': 'Ошибка при сохранении голосования'}, status=400)
+        return JsonResponse(
+            {'error': 'Ошибка при сохранении голосования'}, status=400
+        )
 
 
 def top_quotes(request):
@@ -164,58 +174,83 @@ def dashboard(request):
     - Круговые диаграммы просмотров и лайков
     - Топ авторы по количеству цитат
     """
-    TYPE_CHOICES_DICT = dict(Quote.TYPE_CHOICES)
+    type_choices_dict = dict(Quote.TYPE_CHOICES)
 
     quotes_by_type = list(
         Quote.objects.values('type_of_source').annotate(total=Count('id'))
     )
-    for q in quotes_by_type:
-        q['type_of_source'] = TYPE_CHOICES_DICT.get(q['type_of_source'], q['type_of_source'])
-    type_labels = [q['type_of_source'] for q in quotes_by_type]
+    for type_item in quotes_by_type:
+        type_item['type_of_source'] = type_choices_dict.get(
+            type_item['type_of_source'], type_item['type_of_source']
+        )
+    type_labels = [item['type_of_source'] for item in quotes_by_type]
 
     stacked_data = []
-    for q in quotes_by_type:
-        key = [k for k,v in TYPE_CHOICES_DICT.items() if v == q['type_of_source']][0]
-        qs = Quote.objects.filter(type_of_source=key)
+    for type_item in quotes_by_type:
+        type_key = [
+            key for key, val in type_choices_dict.items()
+            if val == type_item['type_of_source']
+        ][0]
+        qs = Quote.objects.filter(type_of_source=type_key)
         stacked_data.append({
-            'likes': qs.aggregate(total_likes=Sum('likes'))['total_likes'] or 0,
-            'dislikes': qs.aggregate(total_dislikes=Sum('dislikes'))['total_dislikes'] or 0,
+            'likes': qs.aggregate(total_likes=Sum('likes'))['total_likes']
+            or 0,
+            'dislikes': qs.aggregate(
+                total_dislikes=Sum('dislikes')
+            )['total_dislikes'] or 0,
         })
 
     start_date = now() - timedelta(days=7)
     likes_last_days_qs = (
-        QuoteVote.objects.filter(vote_type='like', created_at__gte=start_date)
+        QuoteVote.objects.filter(
+            vote_type='like', created_at__gte=start_date
+        )
         .values('created_at__date')
         .annotate(total=Count('id'))
         .order_by('created_at__date')
     )
     dislikes_last_days_qs = (
-        QuoteVote.objects.filter(vote_type='dislike', created_at__gte=start_date)
+        QuoteVote.objects.filter(
+            vote_type='dislike', created_at__gte=start_date
+        )
         .values('created_at__date')
         .annotate(total=Count('id'))
         .order_by('created_at__date')
     )
     likes_last_days = [
-        {'date': x['created_at__date'].strftime('%Y-%m-%d'), 'total': x['total']}
-        for x in likes_last_days_qs
+        {'date': item['created_at__date'].strftime('%Y-%m-%d'),
+         'total': item['total']}
+        for item in likes_last_days_qs
     ]
     dislikes_last_days = [
-        {'date': x['created_at__date'].strftime('%Y-%m-%d'), 'total': x['total']}
-        for x in dislikes_last_days_qs
+        {'date': item['created_at__date'].strftime('%Y-%m-%d'),
+         'total': item['total']}
+        for item in dislikes_last_days_qs
     ]
 
     views_by_type_qs = list(
-        Quote.objects.values('type_of_source').annotate(total_views=Sum('views'))
+        Quote.objects.values('type_of_source').annotate(
+            total_views=Sum('views')
+        )
     )
-    for v in views_by_type_qs:
-        v['type_of_source'] = TYPE_CHOICES_DICT.get(v['type_of_source'], v['type_of_source'])
+    for view_item in views_by_type_qs:
+        view_item['type_of_source'] = type_choices_dict.get(
+            view_item['type_of_source'], view_item['type_of_source']
+        )
     likes_by_type_qs = list(
-        Quote.objects.values('type_of_source').annotate(total_likes=Sum('likes'))
+        Quote.objects.values('type_of_source').annotate(
+            total_likes=Sum('likes')
+        )
     )
-    for l in likes_by_type_qs:
-        l['type_of_source'] = TYPE_CHOICES_DICT.get(l['type_of_source'], l['type_of_source'])
+    for like_item in likes_by_type_qs:
+        like_item['type_of_source'] = type_choices_dict.get(
+            like_item['type_of_source'], like_item['type_of_source']
+        )
 
-    top_authors = User.objects.annotate(total_quotes=Count('quotes')).order_by('-total_quotes')[:5]
+    top_authors = (
+        User.objects.annotate(total_quotes=Count('quotes'))
+        .order_by('-total_quotes')[:5]
+    )
 
     context = {
         'type_labels': type_labels,
@@ -249,4 +284,8 @@ def edit_quote(request, quote_id):
     else:
         form = QuoteForm(instance=quote)
 
-    return render(request, 'quotes/edit_quote.html', {'form': form, 'quote': quote})
+    return render(
+        request,
+        'quotes/edit_quote.html',
+        {'form': form, 'quote': quote},
+    )

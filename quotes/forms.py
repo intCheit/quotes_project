@@ -1,5 +1,4 @@
 from django import forms
-from django.core.exceptions import ValidationError
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
@@ -40,7 +39,12 @@ class QuoteForm(forms.ModelForm):
     movie_link = forms.URLField(
         label="Ссылка на фильм (необязательно)",
         required=False,
-        widget=forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'https://...'})
+        widget=forms.URLInput(
+            attrs={
+                'class': 'form-control',
+                'placeholder': 'https://...'
+            }
+        )
     )
 
     def clean(self):
