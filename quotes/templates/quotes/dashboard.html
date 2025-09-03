@@ -5,37 +5,30 @@
 {% block content %}
 <h2>Статистика цитат</h2>
 
-<div class="dashboard-grid">
-
-  <div class="chart-container">
-    <canvas id="quotesChart"></canvas>
-  </div>
-
-  <div class="chart-container">
-    <canvas id="stackedChart"></canvas>
-  </div>
-
-  <div class="chart-container">
-    <canvas id="likesLastDaysChart"></canvas>
-  </div>
-
-  <div class="chart-container">
-    <canvas id="dislikesLastDaysChart"></canvas>
-  </div>
-
+<!-- Блок столбчатых и линейных графиков 2x2 -->
+<div class="chart-block" style="display: flex; flex-wrap: wrap; gap: 20px;">
+    <div class="chart-item">
+        <canvas id="quotesChart" width="400" height="300"></canvas>
+    </div>
+    <div class="chart-item">
+        <canvas id="stackedChart" width="400" height="300"></canvas>
+    </div>
+    <div class="chart-item">
+        <canvas id="likesLastDaysChart" width="400" height="300"></canvas>
+    </div>
+    <div class="chart-item">
+        <canvas id="dislikesLastDaysChart" width="400" height="300"></canvas>
+    </div>
 </div>
 
-<h3>Круговые диаграммы</h3>
-<div class="dashboard-grid">
-
-  <div class="chart-container">
-    <canvas id="viewsPieChart"></canvas>
-  </div>
-
-  <div class="chart-container">
-    <canvas id="likesPieChart"></canvas>
-  </div>
-
+<!-- Блок круговых диаграмм 2x1 -->
+<div class="chart-block" style="display: flex; flex-wrap: wrap; gap: 20px;">
+    <div class="chart-item">
+        <canvas id="viewsPieChart" width="400" height="300"></canvas>
+    </div>
+    <div class="chart-item">
+        <canvas id="likesPieChart" width="400" height="300"></canvas>
+    </div>
 </div>
 
 <h3>Топ авторы по количеству цитат</h3>
@@ -45,22 +38,27 @@
   {% endfor %}
 </ul>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
-
-<script>
-const chartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-        datalabels: {
-            color: 'black',
-            font: { weight: 'bold' },
-        }
+<!-- Адаптивный стиль -->
+<style>
+.chart-block {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+.chart-item {
+    flex: 1 1 calc(50% - 10px);
+}
+@media (max-width: 768px) {
+    .chart-item {
+        flex: 1 1 100%;
     }
-};
+}
+</style>
 
-// Количество цитат по типу
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+<script>
+// Количество цитат по типу источника
 new Chart(document.getElementById('quotesChart'), {
     type: 'bar',
     data: {
@@ -74,16 +72,14 @@ new Chart(document.getElementById('quotesChart'), {
         }]
     },
     options: {
-        ...chartOptions,
         plugins: {
-            ...chartOptions.plugins,
             title: { display: true, text: 'Количество цитат по типу источника', font: { size: 16 } },
             legend: { display: false }
         }
     }
 });
 
-// Столбчатая диаграмма с накоплением: лайки и дизлайки
+// Столбчатая диаграмма лайки/дизлайки по типу
 new Chart(document.getElementById('stackedChart'), {
     type: 'bar',
     data: {
@@ -106,9 +102,7 @@ new Chart(document.getElementById('stackedChart'), {
         ]
     },
     options: {
-        ...chartOptions,
         plugins: {
-            ...chartOptions.plugins,
             title: { display: true, text: 'Лайки и дизлайки по типу источника', font: { size: 16 } }
         },
         scales: { x: { stacked: true }, y: { stacked: true } }
@@ -129,11 +123,7 @@ new Chart(document.getElementById('likesLastDaysChart'), {
         }]
     },
     options: {
-        ...chartOptions,
-        plugins: {
-            ...chartOptions.plugins,
-            title: { display: true, text: 'Лайки за последние 7 дней', font: { size: 16 } }
-        }
+        plugins: { title: { display: true, text: 'Лайки за последние 7 дней', font: { size: 16 } } }
     }
 });
 
@@ -150,20 +140,31 @@ new Chart(document.getElementById('dislikesLastDaysChart'), {
         }]
     },
     options: {
-        ...chartOptions,
-        plugins: {
-            ...chartOptions.plugins,
-            title: { display: true, text: 'Дизлайки за последние 7 дней', font: { size: 16 } }
-        }
+        plugins: { title: { display: true, text: 'Дизлайки за последние 7 дней', font: { size: 16 } } }
     }
 });
 
-// Круговые диаграммы
+// Круговые диаграммы с процентами и скрытием нулевых
+const pieOptions = {
+    plugins: {
+        title: { display: true, font: { size: 16 } },
+        datalabels: {
+            color: 'black',
+            formatter: (value, ctx) => {
+                const sum = ctx.chart.data.datasets[0].data.reduce((a,b) => a + b, 0);
+                return value === 0 ? '' : Math.round(value*100/sum) + '%';
+            }
+        },
+        legend: { display: true, position: 'bottom' }
+    }
+};
+
 new Chart(document.getElementById('viewsPieChart'), {
     type: 'pie',
     data: {
         labels: {{ type_labels|safe }},
         datasets: [{
+            label: 'Просмотры по типу',
             data: {{ views_by_type|pluck:"total_views"|safe }},
             backgroundColor: [
                 'rgba(135,206,235,0.5)',
@@ -174,17 +175,7 @@ new Chart(document.getElementById('viewsPieChart'), {
             ]
         }]
     },
-    options: {
-        ...chartOptions,
-        plugins: {
-            ...chartOptions.plugins,
-            title: { display: true, text: 'Распределение просмотров по типу источника', font: { size: 16 } },
-            datalabels: {
-                ...chartOptions.plugins.datalabels,
-                formatter: (value, ctx) => value === 0 ? '' : ((value / ctx.chart.data.datasets[0].data.reduce((a,b) => a+b,0))*100).toFixed(1) + '%'
-            }
-        }
-    },
+    options: { ...pieOptions, plugins: { ...pieOptions.plugins, title: { display: true, text: 'Распределение просмотров по типу источника', font: { size: 16 } } } },
     plugins: [ChartDataLabels]
 });
 
@@ -193,6 +184,7 @@ new Chart(document.getElementById('likesPieChart'), {
     data: {
         labels: {{ type_labels|safe }},
         datasets: [{
+            label: 'Лайки по типу',
             data: {{ likes_by_type|pluck:"total_likes"|safe }},
             backgroundColor: [
                 'rgba(0,255,127,0.5)',
@@ -203,33 +195,8 @@ new Chart(document.getElementById('likesPieChart'), {
             ]
         }]
     },
-    options: {
-        ...chartOptions,
-        plugins: {
-            ...chartOptions.plugins,
-            title: { display: true, text: 'Распределение лайков по типу источника', font: { size: 16 } },
-            datalabels: {
-                ...chartOptions.plugins.datalabels,
-                formatter: (value, ctx) => value === 0 ? '' : ((value / ctx.chart.data.datasets[0].data.reduce((a,b) => a+b,0))*100).toFixed(1) + '%'
-            }
-        }
-    },
+    options: { ...pieOptions, plugins: { ...pieOptions.plugins, title: { display: true, text: 'Распределение лайков по типу источника', font: { size: 16 } } } },
     plugins: [ChartDataLabels]
 });
 </script>
-
-<style>
-.dashboard-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-    gap: 30px;
-    margin-bottom: 40px;
-}
-.chart-container {
-    position: relative;
-    width: 100%;
-    height: 350px; /* можно подстроить по вкусу */
-}
-</style>
-
 {% endblock %}
