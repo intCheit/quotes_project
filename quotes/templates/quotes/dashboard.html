@@ -5,21 +5,44 @@
 {% block content %}
 <h2>Статистика цитат</h2>
 
-<!-- Количество цитат по типу источника -->
-<canvas id="quotesChart" width="400" height="200" class="mb-4"></canvas>
+<style>
+.charts-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
 
-<!-- Stacked bar chart: лайки/дизлайки по типу источника -->
-<canvas id="stackedChart" width="400" height="200" class="mb-4"></canvas>
+.chart-container {
+    width: 100%;
+    height: 300px;
+}
 
-<!-- Линейные графики лайки/дизлайки за последние 7 дней -->
-<canvas id="likesLastDaysChart" width="400" height="200" class="mb-4"></canvas>
-<canvas id="dislikesLastDaysChart" width="400" height="200" class="mb-4"></canvas>
+.chart-container.large-chart {
+    height: 350px; /* увеличенные круговые диаграммы */
+}
+</style>
 
-<!-- Круговые диаграммы -->
-<canvas id="viewsPieChart" width="400" height="200" class="mb-4"></canvas>
-<canvas id="likesPieChart" width="400" height="200" class="mb-4"></canvas>
+<div class="charts-grid">
+    <div class="chart-container">
+        <canvas id="quotesChart"></canvas>
+    </div>
+    <div class="chart-container">
+        <canvas id="stackedChart"></canvas>
+    </div>
+    <div class="chart-container">
+        <canvas id="likesLastDaysChart"></canvas>
+    </div>
+    <div class="chart-container">
+        <canvas id="dislikesLastDaysChart"></canvas>
+    </div>
+    <div class="chart-container large-chart">
+        <canvas id="viewsPieChart"></canvas>
+    </div>
+    <div class="chart-container large-chart">
+        <canvas id="likesPieChart"></canvas>
+    </div>
+</div>
 
-<!-- Топ авторы по количеству цитат -->
 <h3>Топ авторы по количеству цитат</h3>
 <ul>
   {% for author in top_authors %}
