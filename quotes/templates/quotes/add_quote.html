@@ -16,9 +16,7 @@
         <div class="mb-3">
             <label for="id_text" class="form-label">Текст цитаты</label>
             <textarea name="text" id="id_text" class="form-control" rows="3"
-                onfocus="if(this.value==='Чтобы стать царем зверей, мало вести себя по-царски. Надо быть царём. Нельзя сомневаться. Сомнения порождают хаос и ведут тебя к гибели. Так сказала моя царица...'){this.value=''}"
-                onblur="if(this.value===''){this.value='Чтобы стать царем зверей, мало вести себя по-царски. Надо быть царём. Нельзя сомневаться. Сомнения порождают хаос и ведут тебя к гибели. Так сказала моя царица...'}"
-            >Чтобы стать царем зверей, мало вести себя по-царски. Надо быть царём. Нельзя сомневаться. Сомнения порождают хаос и ведут тебя к гибели. Так сказала моя царица...</textarea>
+                      placeholder="Например: Чтобы стать царем зверей, мало вести себя по-царски...">{{ form.text.value|default_if_none:'' }}</textarea>
             {% if form.text.errors %}
                 <div class="text-danger mt-1">{{ form.text.errors.0 }}</div>
             {% endif %}
@@ -37,10 +35,8 @@
         <div class="mb-3">
             <label for="id_source" class="form-label">Источник (фильм, книга и т.д.)</label>
             <input type="text" name="source" id="id_source" class="form-control"
-                value="Джентельмены (2019)"
-                onfocus="if(this.value==='Джентельмены (2019)'){this.value=''}"
-                onblur="if(this.value===''){this.value='Джентельмены (2019)'}"
-            >
+                   placeholder="Например: Джентельмены (2019)"
+                   value="{{ form.source.value|default_if_none:'' }}">
             {% if form.source.errors %}
                 <div class="text-danger mt-1">{{ form.source.errors.0 }}</div>
             {% endif %}
@@ -50,10 +46,8 @@
         <div class="mb-3">
             <label for="id_movie_link" class="form-label">Ссылка на фильм</label>
             <input type="url" name="movie_link" id="id_movie_link" class="form-control"
-                value="https://www.kinopoisk.ru/film/1143242/"
-                onfocus="if(this.value==='https://www.kinopoisk.ru/film/1143242/'){this.value=''}"
-                onblur="if(this.value===''){this.value='https://www.kinopoisk.ru/film/1143242/'}"
-            >
+                   placeholder="Например: https://www.kinopoisk.ru/film/1143242/"
+                   value="{{ form.movie_link.value|default_if_none:'' }}">
             {% if form.movie_link.errors %}
                 <div class="text-danger mt-1">{{ form.movie_link.errors.0 }}</div>
             {% endif %}
@@ -63,7 +57,9 @@
         <div class="mb-3">
             <label for="id_weight" class="form-label">Вес (1–10)</label>
             <input type="number" name="weight" id="id_weight" class="form-control" required
-                   min="1" max="10" value="{{ form.weight.value|default_if_none:1 }}">
+                   min="1" max="10"
+                   value="{{ form.weight.value|default_if_none:1 }}"
+                   placeholder="От 1 до 10">
             {% if form.weight.errors %}
                 <div class="text-danger mt-1">{{ form.weight.errors.0 }}</div>
             {% endif %}

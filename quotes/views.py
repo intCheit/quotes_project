@@ -108,6 +108,8 @@ def add_quote(request):
                 quote.author = request.user
             quote.save()
             return redirect('random_quote')
+        # ⚡️ вот этого блока у тебя не было
+        return render(request, 'quotes/add_quote.html', {'form': form})
     else:
         form = QuoteForm()
     return render(request, 'quotes/add_quote.html', {'form': form})

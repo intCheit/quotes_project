@@ -23,7 +23,12 @@ class Quote(models.Model):
         related_name='quotes'
     )
 
-    text = models.TextField(unique=True)
+    text = models.TextField(
+        unique=True,
+        error_messages={
+            "unique": "Такая цитата уже существует."
+        }
+    )
     source = models.CharField(max_length=255)
     type_of_source = models.CharField(
         max_length=20,
