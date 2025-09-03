@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.utils import timezone
 
 
 class Quote(models.Model):
@@ -85,6 +86,7 @@ class QuoteVote(models.Model):
         related_name='votes'
     )
     vote_type = models.CharField(max_length=7, choices=VOTE_CHOICES)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         unique_together = ('user', 'quote')

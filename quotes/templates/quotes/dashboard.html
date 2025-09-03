@@ -1,52 +1,161 @@
 {% extends "quotes/base.html" %}
-{% load quote_extras %}  {# Подключаем пользовательские фильтры #}
-
+{% load quote_extras %}
 {% block title %}Дашборд{% endblock %}
 
 {% block content %}
 <h2>Статистика цитат</h2>
 
-<canvas id="quotesChart" width="400" height="200"></canvas>
-<canvas id="likesChart" width="400" height="200" class="mt-4"></canvas>
-<canvas id="dislikesChart" width="400" height="200" class="mt-4"></canvas>
+<!-- Количество цитат по типу источника -->
+<canvas id="quotesChart" width="400" height="200" class="mb-4"></canvas>
+
+<!-- Stacked bar chart: лайки/дизлайки по типу источника -->
+<canvas id="stackedChart" width="400" height="200" class="mb-4"></canvas>
+
+<!-- Линейные графики лайки/дизлайки за последние 7 дней -->
+<canvas id="likesLastDaysChart" width="400" height="200" class="mb-4"></canvas>
+<canvas id="dislikesLastDaysChart" width="400" height="200" class="mb-4"></canvas>
+
+<!-- Круговые диаграммы -->
+<canvas id="viewsPieChart" width="400" height="200" class="mb-4"></canvas>
+<canvas id="likesPieChart" width="400" height="200" class="mb-4"></canvas>
+
+<!-- Топ авторы по количеству цитат -->
+<h3>Топ авторы по количеству цитат</h3>
+<ul>
+  {% for author in top_authors %}
+    <li>{{ author.username }} — {{ author.total_quotes }} цитат</li>
+  {% endfor %}
+</ul>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-const quotesData = {
-    labels: {{ quotes_by_type|pluck:"type_of_source"|safe }},
-    datasets: [{
-        label: 'Количество цитат',
-        data: {{ quotes_by_type|pluck:"total"|safe }},
-        backgroundColor: 'rgba(135, 206, 235, 0.5)',
-        borderColor: 'rgba(0, 191, 255, 1)',
-        borderWidth: 1
-    }]
-};
+// Количество цитат по типу
+new Chart(document.getElementById('quotesChart'), {
+    type: 'bar',
+    data: {
+        labels: {{ type_labels|safe }},
+        datasets: [{
+            label: 'Количество цитат',
+            data: {{ quotes_by_type|pluck:"total"|safe }},
+            backgroundColor: 'rgba(135, 206, 235, 0.5)',
+            borderColor: 'rgba(0, 191, 255, 1)',
+            borderWidth: 1
+        }]
+    },
+    options: {
+        plugins: {
+            title: { display: true, text: 'Количество цитат по типу источника', font: { size: 16 } },
+            legend: { display: false }
+        }
+    }
+});
 
-const likesData = {
-    labels: {{ likes_by_type|pluck:"type_of_source"|safe }},
-    datasets: [{
-        label: 'Лайки',
-        data: {{ likes_by_type|pluck:"total_likes"|safe }},
-        backgroundColor: 'rgba(0, 255, 127, 0.5)',
-        borderColor: 'rgba(0, 128, 0, 1)',
-        borderWidth: 1
-    }]
-};
+// Stacked bar chart лайки/дизлайки по типу
+new Chart(document.getElementById('stackedChart'), {
+    type: 'bar',
+    data: {
+        labels: {{ type_labels|safe }},
+        datasets: [
+            {
+                label: 'Лайки',
+                data: {{ stacked_data|pluck:"likes"|safe }},
+                backgroundColor: 'rgba(0, 255, 127, 0.5)',
+                borderColor: 'rgba(0,128,0,1)',
+                borderWidth: 1
+            },
+            {
+                label: 'Дизлайки',
+                data: {{ stacked_data|pluck:"dislikes"|safe }},
+                backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                borderColor: 'rgba(255,0,0,1)',
+                borderWidth: 1
+            }
+        ]
+    },
+    options: {
+        plugins: {
+            title: { display: true, text: 'Лайки и дизлайки по типу источника', font: { size: 16 } }
+        },
+        scales: { x: { stacked: true }, y: { stacked: true } }
+    }
+});
 
-const dislikesData = {
-    labels: {{ dislikes_by_type|pluck:"type_of_source"|safe }},
-    datasets: [{
-        label: 'Дизлайки',
-        data: {{ dislikes_by_type|pluck:"total_dislikes"|safe }},
-        backgroundColor: 'rgba(255, 99, 132, 0.5)',
-        borderColor: 'rgba(255, 0, 0, 1)',
-        borderWidth: 1
-    }]
-};
+// Линейные графики лайки/дизлайки за 7 дней
+new Chart(document.getElementById('likesLastDaysChart'), {
+    type: 'line',
+    data: {
+        labels: {{ likes_last_days|pluck:"date"|safe }},
+        datasets: [{
+            label: 'Лайки за день',
+            data: {{ likes_last_days|pluck:"total"|safe }},
+            fill: false,
+            borderColor: 'rgba(0,128,0,1)',
+            tension: 0.1
+        }]
+    },
+    options: {
+        plugins: { title: { display: true, text: 'Лайки за последние 7 дней', font: { size: 16 } } }
+    }
+});
 
-new Chart(document.getElementById('quotesChart'), { type: 'bar', data: quotesData });
-new Chart(document.getElementById('likesChart'), { type: 'bar', data: likesData });
-new Chart(document.getElementById('dislikesChart'), { type: 'bar', data: dislikesData });
+new Chart(document.getElementById('dislikesLastDaysChart'), {
+    type: 'line',
+    data: {
+        labels: {{ dislikes_last_days|pluck:"date"|safe }},
+        datasets: [{
+            label: 'Дизлайки за день',
+            data: {{ dislikes_last_days|pluck:"total"|safe }},
+            fill: false,
+            borderColor: 'rgba(255,0,0,1)',
+            tension: 0.1
+        }]
+    },
+    options: {
+        plugins: { title: { display: true, text: 'Дизлайки за последние 7 дней', font: { size: 16 } } }
+    }
+});
+
+// Круговые диаграммы
+new Chart(document.getElementById('viewsPieChart'), {
+    type: 'pie',
+    data: {
+        labels: {{ type_labels|safe }},
+        datasets: [{
+            label: 'Просмотры по типу',
+            data: {{ views_by_type|pluck:"total_views"|safe }},
+            backgroundColor: [
+                'rgba(135,206,235,0.5)',
+                'rgba(255,206,86,0.5)',
+                'rgba(75,192,192,0.5)',
+                'rgba(255,99,132,0.5)',
+                'rgba(153,102,255,0.5)'
+            ]
+        }]
+    },
+    options: {
+        plugins: { title: { display: true, text: 'Распределение просмотров по типу источника', font: { size: 16 } } }
+    }
+});
+
+new Chart(document.getElementById('likesPieChart'), {
+    type: 'pie',
+    data: {
+        labels: {{ type_labels|safe }},
+        datasets: [{
+            label: 'Лайки по типу',
+            data: {{ likes_by_type|pluck:"total_likes"|safe }},
+            backgroundColor: [
+                'rgba(0,255,127,0.5)',
+                'rgba(54,162,235,0.5)',
+                'rgba(255,206,86,0.5)',
+                'rgba(255,99,132,0.5)',
+                'rgba(153,102,255,0.5)'
+            ]
+        }]
+    },
+    options: {
+        plugins: { title: { display: true, text: 'Распределение лайков по типу источника', font: { size: 16 } } }
+    }
+});
 </script>
 {% endblock %}
