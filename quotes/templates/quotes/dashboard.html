@@ -5,66 +5,39 @@
 {% block content %}
 <h2>Статистика цитат</h2>
 
-<style>
-.charts-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr); /* 2 колонки */
-    gap: 20px;
-    margin-bottom: 40px;
-}
+<div class="dashboard-grid">
 
-.chart-container {
-    width: 100%;
-    height: 400px;
-}
+  <div class="chart-container">
+    <canvas id="quotesChart"></canvas>
+  </div>
 
-.chart-block {
-    margin-bottom: 60px;
-}
+  <div class="chart-container">
+    <canvas id="stackedChart"></canvas>
+  </div>
 
-.pie-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
-}
+  <div class="chart-container">
+    <canvas id="likesLastDaysChart"></canvas>
+  </div>
 
-.pie-container {
-    width: 100%;
-    height: 450px; /* увеличенные круговые диаграммы */
-}
-</style>
+  <div class="chart-container">
+    <canvas id="dislikesLastDaysChart"></canvas>
+  </div>
 
-<!-- Блок 1: Bar и Line графики -->
-<div class="chart-block">
-    <div class="charts-grid">
-        <div class="chart-container">
-            <canvas id="quotesChart"></canvas>
-        </div>
-        <div class="chart-container">
-            <canvas id="stackedChart"></canvas>
-        </div>
-        <div class="chart-container">
-            <canvas id="likesLastDaysChart"></canvas>
-        </div>
-        <div class="chart-container">
-            <canvas id="dislikesLastDaysChart"></canvas>
-        </div>
-    </div>
 </div>
 
-<!-- Блок 2: Круговые диаграммы -->
-<div class="chart-block">
-    <div class="pie-grid">
-        <div class="pie-container">
-            <canvas id="viewsPieChart"></canvas>
-        </div>
-        <div class="pie-container">
-            <canvas id="likesPieChart"></canvas>
-        </div>
-    </div>
+<h3>Круговые диаграммы</h3>
+<div class="dashboard-grid">
+
+  <div class="chart-container">
+    <canvas id="viewsPieChart"></canvas>
+  </div>
+
+  <div class="chart-container">
+    <canvas id="likesPieChart"></canvas>
+  </div>
+
 </div>
 
-<!-- Топ авторы по количеству цитат -->
 <h3>Топ авторы по количеству цитат</h3>
 <ul>
   {% for author in top_authors %}
@@ -74,8 +47,20 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+
 <script>
-// Bar chart: Количество цитат по типу
+const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+        datalabels: {
+            color: 'black',
+            font: { weight: 'bold' },
+        }
+    }
+};
+
+// Количество цитат по типу
 new Chart(document.getElementById('quotesChart'), {
     type: 'bar',
     data: {
@@ -89,14 +74,16 @@ new Chart(document.getElementById('quotesChart'), {
         }]
     },
     options: {
+        ...chartOptions,
         plugins: {
+            ...chartOptions.plugins,
             title: { display: true, text: 'Количество цитат по типу источника', font: { size: 16 } },
             legend: { display: false }
         }
     }
 });
 
-// Stacked bar chart: Лайки/дизлайки по типу
+// Столбчатая диаграмма с накоплением: лайки и дизлайки
 new Chart(document.getElementById('stackedChart'), {
     type: 'bar',
     data: {
@@ -119,14 +106,16 @@ new Chart(document.getElementById('stackedChart'), {
         ]
     },
     options: {
+        ...chartOptions,
         plugins: {
+            ...chartOptions.plugins,
             title: { display: true, text: 'Лайки и дизлайки по типу источника', font: { size: 16 } }
         },
         scales: { x: { stacked: true }, y: { stacked: true } }
     }
 });
 
-// Линейные графики лайки/дизлайки за последние 7 дней
+// Линейные графики лайки/дизлайки за 7 дней
 new Chart(document.getElementById('likesLastDaysChart'), {
     type: 'line',
     data: {
@@ -140,7 +129,11 @@ new Chart(document.getElementById('likesLastDaysChart'), {
         }]
     },
     options: {
-        plugins: { title: { display: true, text: 'Лайки за последние 7 дней', font: { size: 16 } } }
+        ...chartOptions,
+        plugins: {
+            ...chartOptions.plugins,
+            title: { display: true, text: 'Лайки за последние 7 дней', font: { size: 16 } }
+        }
     }
 });
 
@@ -157,43 +150,41 @@ new Chart(document.getElementById('dislikesLastDaysChart'), {
         }]
     },
     options: {
-        plugins: { title: { display: true, text: 'Дизлайки за последние 7 дней', font: { size: 16 } } }
+        ...chartOptions,
+        plugins: {
+            ...chartOptions.plugins,
+            title: { display: true, text: 'Дизлайки за последние 7 дней', font: { size: 16 } }
+        }
     }
 });
 
-// Круговые диаграммы с процентами и чёрным цветом подписей
-const pieOptions = {
-    plugins: {
-        title: { display: true, font: { size: 16 } },
-        datalabels: {
-            color: '#000000',
-            formatter: (value, ctx) => {
-                let sum = ctx.chart.data.datasets[0].data.reduce((a,b) => a+b, 0);
-                let percentage = (value / sum * 100).toFixed(1) + '%';
-                return percentage;
-            },
-            font: { weight: 'bold', size: 14 }
-        }
-    }
-};
-
+// Круговые диаграммы
 new Chart(document.getElementById('viewsPieChart'), {
     type: 'pie',
     data: {
         labels: {{ type_labels|safe }},
         datasets: [{
-            label: 'Просмотры по типу',
             data: {{ views_by_type|pluck:"total_views"|safe }},
             backgroundColor: [
-                'rgba(135,206,235,0.7)',
-                'rgba(255,206,86,0.7)',
-                'rgba(75,192,192,0.7)',
-                'rgba(255,99,132,0.7)',
-                'rgba(153,102,255,0.7)'
+                'rgba(135,206,235,0.5)',
+                'rgba(255,206,86,0.5)',
+                'rgba(75,192,192,0.5)',
+                'rgba(255,99,132,0.5)',
+                'rgba(153,102,255,0.5)'
             ]
         }]
     },
-    options: Object.assign({}, pieOptions, { plugins: { ...pieOptions.plugins, title: { display: true, text: 'Распределение просмотров по типу источника', font: { size: 16 } } } }),
+    options: {
+        ...chartOptions,
+        plugins: {
+            ...chartOptions.plugins,
+            title: { display: true, text: 'Распределение просмотров по типу источника', font: { size: 16 } },
+            datalabels: {
+                ...chartOptions.plugins.datalabels,
+                formatter: (value, ctx) => value === 0 ? '' : ((value / ctx.chart.data.datasets[0].data.reduce((a,b) => a+b,0))*100).toFixed(1) + '%'
+            }
+        }
+    },
     plugins: [ChartDataLabels]
 });
 
@@ -202,19 +193,43 @@ new Chart(document.getElementById('likesPieChart'), {
     data: {
         labels: {{ type_labels|safe }},
         datasets: [{
-            label: 'Лайки по типу',
             data: {{ likes_by_type|pluck:"total_likes"|safe }},
             backgroundColor: [
-                'rgba(0,255,127,0.7)',
-                'rgba(54,162,235,0.7)',
-                'rgba(255,206,86,0.7)',
-                'rgba(255,99,132,0.7)',
-                'rgba(153,102,255,0.7)'
+                'rgba(0,255,127,0.5)',
+                'rgba(54,162,235,0.5)',
+                'rgba(255,206,86,0.5)',
+                'rgba(255,99,132,0.5)',
+                'rgba(153,102,255,0.5)'
             ]
         }]
     },
-    options: Object.assign({}, pieOptions, { plugins: { ...pieOptions.plugins, title: { display: true, text: 'Распределение лайков по типу источника', font: { size: 16 } } } }),
+    options: {
+        ...chartOptions,
+        plugins: {
+            ...chartOptions.plugins,
+            title: { display: true, text: 'Распределение лайков по типу источника', font: { size: 16 } },
+            datalabels: {
+                ...chartOptions.plugins.datalabels,
+                formatter: (value, ctx) => value === 0 ? '' : ((value / ctx.chart.data.datasets[0].data.reduce((a,b) => a+b,0))*100).toFixed(1) + '%'
+            }
+        }
+    },
     plugins: [ChartDataLabels]
 });
 </script>
+
+<style>
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 30px;
+    margin-bottom: 40px;
+}
+.chart-container {
+    position: relative;
+    width: 100%;
+    height: 350px; /* можно подстроить по вкусу */
+}
+</style>
+
 {% endblock %}
