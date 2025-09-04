@@ -37,7 +37,7 @@ class QuoteForm(forms.ModelForm):
         fields = ['text', 'source', 'weight', 'type_of_source']
 
     movie_link = forms.URLField(
-        label="Ссылка на фильм (необязательно)",
+        label="Ссылка на произведение (необязательно)",
         required=False,
         widget=forms.URLInput(
             attrs={

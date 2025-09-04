@@ -8,10 +8,16 @@
 
     <div class="mb-3">
         <strong>Фильтр по типу источника:</strong>
-        <a href="{% url 'random_source_quotes' %}" class="btn btn-outline-secondary btn-sm {% if not type_filter %}active{% endif %}">Все</a>
-        <a href="{% url 'random_source_quotes' %}?type=film" class="btn btn-outline-secondary btn-sm {% if type_filter == 'film' %}active{% endif %}">Фильмы</a>
-        <a href="{% url 'random_source_quotes' %}?type=book" class="btn btn-outline-secondary btn-sm {% if type_filter == 'book' %}active{% endif %}">Книги</a>
-        <a href="{% url 'random_source_quotes' %}?type=game" class="btn btn-outline-secondary btn-sm {% if type_filter == 'game' %}active{% endif %}">Игры</a>
+        <a href="{% url 'random_source_quotes' %}" 
+           class="btn btn-outline-secondary btn-sm {% if not type_filter %}active{% endif %}">
+           Все
+        </a>
+        {% for value, label in type_choices_sorted %}
+            <a href="{% url 'random_source_quotes' %}?type={{ value }}" 
+               class="btn btn-outline-secondary btn-sm {% if type_filter == value %}active{% endif %}">
+               {{ label }}
+            </a>
+        {% endfor %}
     </div>
 
     {% if quotes %}
@@ -30,8 +36,14 @@
                     {% if user.is_authenticated %}
                         {% with user_vote=quote.votes|get_vote:user %}
                         <div class="mb-2">
-                            <button id="like-btn-{{ quote.id }}" class="btn me-2 {% if user_vote == 'like' %}btn-success{% else %}btn-primary{% endif %}">👍 Лайк</button>
-                            <button id="dislike-btn-{{ quote.id }}" class="btn {% if user_vote == 'dislike' %}btn-danger{% else %}btn-primary{% endif %}">👎 Дизлайк</button>
+                            <button id="like-btn-{{ quote.id }}" 
+                                    class="btn me-2 {% if user_vote == 'like' %}btn-success{% else %}btn-primary{% endif %}">
+                                👍 Лайк
+                            </button>
+                            <button id="dislike-btn-{{ quote.id }}" 
+                                    class="btn {% if user_vote == 'dislike' %}btn-danger{% else %}btn-primary{% endif %}">
+                                👎 Дизлайк
+                            </button>
                         </div>
                         {% endwith %}
                     {% endif %}
@@ -42,8 +54,9 @@
         <p>Цитат пока нет для выбранного произведения.</p>
     {% endif %}
 
-    <p class="mt-3">
-        <a href="{% url 'random_quote' %}" class="btn btn-outline-primary">← Назад к случайной цитате</a>
+    <p class="mt-3 d-flex gap-2">
+        <a href="{% url 'random_quote' %}" class="btn btn-outline-primary">← Вернуться к случайной цитате</a>
+        <a href="{% url 'add_quote' %}" class="btn btn-outline-primary">➕ Добавить цитату</a>
     </p>
 </div>
 

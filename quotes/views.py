@@ -143,6 +143,7 @@ def random_source_quotes(request):
     Возвращает цитаты случайного источника с фильтром по типу источника.
     """
     type_filter = request.GET.get('type')
+    type_choices_sorted = sorted(Quote.TYPE_CHOICES, key=lambda x: x[1])
     sources_qs = Quote.objects.all()
     if type_filter:
         sources_qs = sources_qs.filter(type_of_source=type_filter)
@@ -159,6 +160,7 @@ def random_source_quotes(request):
         'quotes': quotes,
         'source': source,
         'type_filter': type_filter,
+        'type_choices_sorted': type_choices_sorted,
         'user': request.user,
     }
     return render(request, 'quotes/quotes_by_source.html', context)

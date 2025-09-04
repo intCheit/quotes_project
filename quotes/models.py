@@ -39,7 +39,7 @@ class Quote(models.Model):
         max_length=500,
         blank=True,
         null=True,
-        verbose_name="Ссылка на фильм"
+        verbose_name="Ссылка на произведение"
     )
     weight = models.PositiveIntegerField(default=1)
     views = models.PositiveIntegerField(default=0)
