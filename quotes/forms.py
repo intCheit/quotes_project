@@ -72,7 +72,11 @@ class CustomUserCreationForm(UserCreationForm):
         help_text=_(
             "Обязательное поле. До 150 символов. Используйте буквы, цифры "
             "и @/./+/-/_ только."
-        )
+        ),
+        error_messages={
+            "unique": _("Пользователь с таким именем уже существует."),
+            "required": _("Поле обязательно для заполнения."),
+        }
     )
     password1 = forms.CharField(
         label="Пароль",
@@ -80,12 +84,18 @@ class CustomUserCreationForm(UserCreationForm):
         help_text=_(
             "Пароль должен содержать минимум 8 символов, не быть слишком "
             "простым и не полностью состоять из цифр."
-        )
+        ),
+        error_messages={
+            "required": _("Поле обязательно для заполнения."),
+        }
     )
     password2 = forms.CharField(
         label="Подтверждение пароля",
         widget=forms.PasswordInput,
-        help_text=_("Введите тот же пароль для подтверждения.")
+        help_text=_("Введите тот же пароль для подтверждения."),
+        error_messages={
+            "required": _("Поле обязательно для заполнения."),
+        }
     )
 
     class Meta:
